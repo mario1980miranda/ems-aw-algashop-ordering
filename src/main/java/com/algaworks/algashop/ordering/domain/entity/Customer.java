@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
-import java.util.TimeZone;
 import java.util.UUID;
 
 public class Customer implements Serializable {
