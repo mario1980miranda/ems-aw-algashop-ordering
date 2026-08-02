@@ -1,30 +1,48 @@
 package com.algaworks.algashop.ordering.domain.entity;
 
 import com.algaworks.algashop.ordering.domain.utility.IdGenerator;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.time.*;
-import java.util.Map;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.OffsetDateTime;
 
-public class CustomerTest {
+class CustomerTest {
 
     @Test
-    void testingCustomer() {
+    void given_invalidEmail_whenTryCreateCustomer_shouldGenerateException() {
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> {
+                    new Customer(
+                            IdGenerator.generateTimeBasedUUID(),
+                            "Jhon Doe",
+                            LocalDate.of(1991, 7, 5),
+                            "invalid",
+                            "478-256-2504",
+                            "255-08-0578",
+                            false,
+                            OffsetDateTime.now()
+                    );
+                });
+    }
 
-        Customer customer = new Customer(
+    @Test
+    void given_invalidEmail_whenTryUpdateCustomerEmail_shouldGenerateException() {
+        var customer = new Customer(
                 IdGenerator.generateTimeBasedUUID(),
                 "Jhon Doe",
-                LocalDate.of(1991, Month.JULY,5),
-                "jhon.doe@email.com",
-                "255-852-1397",
-                "399-555-7894",
-                true,
-                OffsetDateTime.of(2025,7,5,15,45,0, 0, ZoneOffset.UTC)
+                LocalDate.of(1991, Month.AUGUST, 5),
+                "jhon.doe@gmail.com",
+                "478-256-2504",
+                "255-08-0578",
+                false,
+                OffsetDateTime.now()
         );
-
-        customer.addLoyaltyPoints(15);
-
-        System.out.println(customer.id());
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> {
+                    customer.changeEmail("invalid");
+                });
     }
+
 }
