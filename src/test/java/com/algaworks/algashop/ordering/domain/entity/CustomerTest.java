@@ -1,5 +1,6 @@
 package com.algaworks.algashop.ordering.domain.entity;
 
+import com.algaworks.algashop.ordering.domain.exception.CustomerArchivedException;
 import com.algaworks.algashop.ordering.domain.utility.IdGenerator;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -45,4 +46,54 @@ class CustomerTest {
                 });
     }
 
+    @Test
+    void given_unarchivedCustomer_whenArchived_shouldAnonymize() {
+        var customer = new Customer(
+                IdGenerator.generateTimeBasedUUID(),
+                "Jhon Doe",
+                LocalDate.of(1991, Month.AUGUST, 5),
+                "jhon.doe@gmail.com",
+                "478-256-2504",
+                "255-08-0578",
+                false,
+                OffsetDateTime.now()
+        );
+
+        customer.archive();
+
+        Assertions.assertWith(customer,
+                c -> Assertions.assertThat(c.fullName()).isEqualTo("Anonymous"),
+                c -> Assertions.assertThat(c.email()).isNotEqualTo("jhon.doe@gmail.com"),
+                c -> Assertions.assertThat(c.phone()).isEqualTo("000-000-0000"),
+                c -> Assertions.assertThat(c.document()).isEqualTo("000-000-0000"),
+                c -> Assertions.assertThat(c.birthDate()).isNull(),
+                c -> Assertions.assertThat(c.isPromotionNotificationAllowed()).isFalse());
+    }
+
+    @Test
+    void given_archivedCustomer_whenTryToUpdate_shouldGenerateException() {
+        var customer = new Customer(
+                IdGenerator.generateTimeBasedUUID(),
+                "Anonymous",
+                null,
+                "anonymous@anonimous.com",
+                "000-000-0000",
+                "000-000-0000",
+                false,
+                true,
+                OffsetDateTime.now(),
+                OffsetDateTime.now()
+        );
+
+        Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
+                .isThrownBy(customer::archive);
+        Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
+                .isThrownBy(() -> customer.changeEmail("update-email@test.com"));
+        Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
+                .isThrownBy(() -> customer.changePhone("111-222-3333"));
+        Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
+                .isThrownBy(customer::enableNotifications);
+        Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
+                .isThrownBy(customer::disableNotifications);
+    }
 }

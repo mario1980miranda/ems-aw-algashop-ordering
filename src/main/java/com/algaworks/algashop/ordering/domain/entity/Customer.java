@@ -1,5 +1,6 @@
 package com.algaworks.algashop.ordering.domain.entity;
 
+import com.algaworks.algashop.ordering.domain.exception.CustomerArchivedException;
 import com.algaworks.algashop.ordering.domain.utility.validator.FieldValidations;
 
 import java.io.Serializable;
@@ -38,7 +39,6 @@ public class Customer implements Serializable {
         this.setRegisteredAt(registeredAt);
         this.setArchivedAt(archivedAt);
         this.setLoyaltyPoints(0);
-        this.setArchived(Boolean.FALSE);
     }
 
     public Customer(UUID id, String fullName, LocalDate birthDate, String email, String phone, String document,
@@ -54,30 +54,44 @@ public class Customer implements Serializable {
     }
 
     public void addLoyaltyPoints(Integer points) {
+        verifyIfChangeable();
 
     }
 
     public void archive() {
-
+        verifyIfChangeable();
+        this.setArchived(Boolean.TRUE);
+        this.setArchivedAt(OffsetDateTime.now());
+        this.setFullName("Anonymous");
+        this.setPhone("000-000-0000");
+        this.setDocument("000-000-0000");
+        this.setEmail(UUID.randomUUID() + "@anonymous.com");
+        this.setBirthDate(null);
+        this.setPromotionNotificationAllowed(Boolean.FALSE);
     }
 
     public void enableNotifications() {
+        verifyIfChangeable();
         this.setPromotionNotificationAllowed(Boolean.TRUE);
     }
 
     public void disableNotifications() {
+        verifyIfChangeable();
         this.setPromotionNotificationAllowed(Boolean.FALSE);
     }
 
     public void changeName(String fullName) {
+        verifyIfChangeable();
         this.setFullName(fullName);
     }
 
     public void changeEmail(String email) {
+        verifyIfChangeable();
         this.setEmail(email);
     }
 
     public void changePhone(String phone) {
+        verifyIfChangeable();
         this.setPhone(phone);
     }
 
@@ -186,6 +200,12 @@ public class Customer implements Serializable {
     private void setLoyaltyPoints(Integer loyaltyPoints) {
         Objects.requireNonNull(loyaltyPoints);
         this.loyaltyPoints = loyaltyPoints;
+    }
+
+    private void verifyIfChangeable() {
+        if (Boolean.TRUE.equals(this.isArchived())) {
+            throw new CustomerArchivedException();
+        }
     }
 
     @Override
