@@ -96,4 +96,43 @@ class CustomerTest {
         Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
                 .isThrownBy(customer::disableNotifications);
     }
+
+    @Test
+    void given_brandNewCustomer_whenAddLoayltyPoints_shouldSumPoints() {
+        var customer = new Customer(
+                IdGenerator.generateTimeBasedUUID(),
+                "Jhon Doe",
+                LocalDate.of(1991, Month.AUGUST, 5),
+                "jhon.doe@gmail.com",
+                "478-256-2504",
+                "255-08-0578",
+                false,
+                OffsetDateTime.now()
+        );
+
+        customer.addLoyaltyPoints(10);
+        customer.addLoyaltyPoints(20);
+
+        Assertions.assertThat(customer.loyaltyPoints()).isEqualTo(30);
+    }
+
+    @Test
+    void given_brandNewCustomer_whenAddInvalidLoayltyPoints_shouldGenerateException() {
+        var customer = new Customer(
+                IdGenerator.generateTimeBasedUUID(),
+                "Jhon Doe",
+                LocalDate.of(1991, Month.AUGUST, 5),
+                "jhon.doe@gmail.com",
+                "478-256-2504",
+                "255-08-0578",
+                false,
+                OffsetDateTime.now()
+        );
+
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> customer.addLoyaltyPoints(0));
+
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> customer.addLoyaltyPoints(-1));
+    }
 }

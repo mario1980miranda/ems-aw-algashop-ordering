@@ -51,11 +51,15 @@ public class Customer implements Serializable {
         this.setDocument(document);
         this.setPromotionNotificationAllowed(promotionNotificationAllowed);
         this.setRegisteredAt(registeredAt);
+        this.setLoyaltyPoints(0);
     }
 
-    public void addLoyaltyPoints(Integer points) {
+    public void addLoyaltyPoints(Integer loyaltyPointsAdded) {
         verifyIfChangeable();
-
+        if (loyaltyPointsAdded <= 0) {
+             throw new IllegalArgumentException();
+        }
+        this.setLoyaltyPoints(this.loyaltyPoints() + loyaltyPointsAdded);
     }
 
     public void archive() {
@@ -199,6 +203,9 @@ public class Customer implements Serializable {
 
     private void setLoyaltyPoints(Integer loyaltyPoints) {
         Objects.requireNonNull(loyaltyPoints);
+        if (loyaltyPoints < 0) {
+            throw new IllegalArgumentException();
+        }
         this.loyaltyPoints = loyaltyPoints;
     }
 
