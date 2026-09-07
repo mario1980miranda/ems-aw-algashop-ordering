@@ -12,40 +12,17 @@ import java.time.ZoneId;
 
 class CustomerTest {
 
-    private static Address anAddress() {
-        return Address.builder()
-                .street("Bourbon Street")
-                .complement("Apt. 114")
-                .number("1134")
-                .neighborhood("North Ville")
-                .city("Yostfort")
-                .state("South Carolina")
-                .zipCode(new ZipCode("799610"))
-                .build();
-    }
-
-    private static Customer.BrandNewCustomerBuild aBrandNewCustomer() {
-        return Customer.brandNew()
-                .fullName(new FullName("Jhon", "Doe"))
-                .birthDate(new BirthDate(LocalDate.of(1991, Month.AUGUST, 5)))
-                .email(new Email("jhon.doe@gmail.com"))
-                .phone(new Phone("478-256-2504"))
-                .document(new Document("255-08-0578"))
-                .promotionNotificationAllowed(false)
-                .address(anAddress());
-    }
-
     @Test
     void given_invalidEmail_whenTryCreateCustomer_shouldGenerateException() {
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> aBrandNewCustomer()
+                .isThrownBy(() -> CustomerTestDataBuilder.aBrandNewCustomer()
                         .email(new Email("invalid"))
                         .build());
     }
 
     @Test
     void given_invalidEmail_whenTryUpdateCustomerEmail_shouldGenerateException() {
-        var customer = aBrandNewCustomer().build();
+        var customer = CustomerTestDataBuilder.anExistingCustomer().build();
 
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> {
@@ -55,7 +32,7 @@ class CustomerTest {
 
     @Test
     void given_unarchivedCustomer_whenArchived_shouldAnonymize() {
-        var customer = aBrandNewCustomer().build();
+        var customer = CustomerTestDataBuilder.aBrandNewCustomer().build();
 
         customer.archive();
 
@@ -66,7 +43,7 @@ class CustomerTest {
                 c -> Assertions.assertThat(c.document()).isEqualTo(new Document("000-000-0000")),
                 c -> Assertions.assertThat(c.birthDate()).isNull(),
                 c -> Assertions.assertThat(c.isPromotionNotificationAllowed()).isFalse(),
-                c -> Assertions.assertThat(c.address()).isEqualTo(anAddress().toBuilder()
+                c -> Assertions.assertThat(c.address()).isEqualTo(CustomerTestDataBuilder.anAddress().toBuilder()
                         .number("Anonymized")
                         .complement(null)
                         .build()));
@@ -74,20 +51,7 @@ class CustomerTest {
 
     @Test
     void given_archivedCustomer_whenTryToUpdate_shouldGenerateException() {
-        var customer = Customer.existing()
-                .id(new CustomerId())
-                .fullName(new FullName("Anonymous", "Anonymous"))
-                .birthDate(null)
-                .email(new Email("anonymous@anonimous.com"))
-                .phone(new Phone("000-000-0000"))
-                .document(new Document("000-000-0000"))
-                .promotionNotificationAllowed(false)
-                .archived(true)
-                .registeredAt(OffsetDateTime.now())
-                .archivedAt(OffsetDateTime.now())
-                .loyaltyPoints(new LoyaltyPoints(10))
-                .address(anAddress())
-                .build();
+        var customer = CustomerTestDataBuilder.existingAnonymizedCustomer().build();
 
         Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
                 .isThrownBy(customer::archive);
@@ -103,7 +67,7 @@ class CustomerTest {
 
     @Test
     void given_brandNewCustomer_whenAddLoayltyPoints_shouldSumPoints() {
-        var customer = aBrandNewCustomer().build();
+        var customer = CustomerTestDataBuilder.aBrandNewCustomer().build();
 
         customer.addLoyaltyPoints(new LoyaltyPoints(10));
         customer.addLoyaltyPoints(new LoyaltyPoints(20));
@@ -113,7 +77,7 @@ class CustomerTest {
 
     @Test
     void given_brandNewCustomer_whenAddInvalidLoayltyPoints_shouldGenerateException() {
-        var customer = aBrandNewCustomer().build();
+        var customer = CustomerTestDataBuilder.aBrandNewCustomer().build();
 
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> customer.addLoyaltyPoints(new LoyaltyPoints(0)));
@@ -124,7 +88,7 @@ class CustomerTest {
 
     @Test
     void given_validValueObjects_whenCreateCustomer_shouldBuildCustomer() {
-        var customer = aBrandNewCustomer().build();
+        var customer = CustomerTestDataBuilder.aBrandNewCustomer().build();
 
         Assertions.assertWith(customer,
                 c -> Assertions.assertThat(c.id()).isNotNull(),
@@ -133,7 +97,7 @@ class CustomerTest {
                 c -> Assertions.assertThat(c.email()).hasToString("jhon.doe@gmail.com"),
                 c -> Assertions.assertThat(c.phone()).hasToString("478-256-2504"),
                 c -> Assertions.assertThat(c.document()).hasToString("255-08-0578"),
-                c -> Assertions.assertThat(c.address()).isEqualTo(anAddress()),
+                c -> Assertions.assertThat(c.address()).isEqualTo(CustomerTestDataBuilder.anAddress()),
                 c -> Assertions.assertThat(c.isPromotionNotificationAllowed()).isFalse(),
                 c -> Assertions.assertThat(c.isArchived()).isFalse(),
                 c -> Assertions.assertThat(c.registeredAt()).isNotNull(),
@@ -144,7 +108,7 @@ class CustomerTest {
     @Test
     void given_futureBirthDate_whenTryCreateCustomer_shouldGenerateException() {
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> aBrandNewCustomer()
+                .isThrownBy(() -> CustomerTestDataBuilder.aBrandNewCustomer()
                         .birthDate(new BirthDate(LocalDate.now(ZoneId.of("UTC")).plusDays(1)))
                         .build());
     }
@@ -152,12 +116,12 @@ class CustomerTest {
     @Test
     void given_blankPhoneOrDocument_whenTryCreateCustomer_shouldGenerateException() {
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> aBrandNewCustomer()
+                .isThrownBy(() -> CustomerTestDataBuilder.aBrandNewCustomer()
                         .phone(new Phone(" "))
                         .build());
 
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> aBrandNewCustomer()
+                .isThrownBy(() -> CustomerTestDataBuilder.aBrandNewCustomer()
                         .document(new Document(" "))
                         .build());
     }
@@ -165,7 +129,7 @@ class CustomerTest {
     @Test
     void given_nullPhoneValue_whenTryCreateCustomer_shouldGenerateException() {
         Assertions.assertThatExceptionOfType(NullPointerException.class)
-                .isThrownBy(() -> aBrandNewCustomer()
+                .isThrownBy(() -> CustomerTestDataBuilder.aBrandNewCustomer()
                         .phone(new Phone(null))
                         .build());
     }
@@ -173,7 +137,7 @@ class CustomerTest {
     @Test
     void given_nullAddress_whenTryCreateCustomer_shouldGenerateException() {
         Assertions.assertThatExceptionOfType(NullPointerException.class)
-                .isThrownBy(() -> aBrandNewCustomer()
+                .isThrownBy(() -> CustomerTestDataBuilder.aBrandNewCustomer()
                         .address(null)
                         .build());
     }
