@@ -2,6 +2,7 @@ package com.algaworks.algashop.ordering.domain.entity;
 
 import com.algaworks.algashop.ordering.domain.exception.CustomerArchivedException;
 import com.algaworks.algashop.ordering.domain.valueobject.*;
+import lombok.Builder;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -24,7 +25,8 @@ public class Customer implements Serializable {
     private LoyaltyPoints loyaltyPoints;
     private Address address;
 
-    public static Customer brandNew(FullName fullName, BirthDate birthDate, Email email, Phone phone, Document document,
+    @Builder(builderClassName = "BrandNewCustomerBuild", builderMethodName = "brandNew")
+    private static Customer createBrandNew(FullName fullName, BirthDate birthDate, Email email, Phone phone, Document document,
                                     Boolean promotionNotificationAllowed, Address address) {
         return new Customer(new CustomerId(),
                 fullName,
@@ -41,26 +43,7 @@ public class Customer implements Serializable {
         );
     }
 
-    public static Customer existing(CustomerId id, FullName fullName, BirthDate birthDate, Email email, Phone phone,
-                                    Document document, Boolean promotionNotificationAllowed, Boolean archived,
-                                    OffsetDateTime registeredAt, OffsetDateTime archivedAt, LoyaltyPoints loyaltyPoints,
-                                    Address address) {
-        return new Customer(
-                id,
-                fullName,
-                birthDate,
-                email,
-                phone,
-                document,
-                promotionNotificationAllowed,
-                archived,
-                registeredAt,
-                archivedAt,
-                loyaltyPoints,
-                address
-        );
-    }
-
+    @Builder(builderClassName = "ExistingCustomerBuild", builderMethodName = "existing")
     private Customer(CustomerId id, FullName fullName, BirthDate birthDate, Email email, Phone phone, Document document,
                     Boolean promotionNotificationAllowed, Boolean archived, OffsetDateTime registeredAt,
                     OffsetDateTime archivedAt, LoyaltyPoints loyaltyPoints, Address address) {
