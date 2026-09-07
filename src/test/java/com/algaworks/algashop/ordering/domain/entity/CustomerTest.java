@@ -10,36 +10,50 @@ import java.time.Month;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class CustomerTest {
 
     @Test
     void given_invalidEmail_whenTryCreateCustomer_shouldGenerateException() {
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> {
-                    new Customer(
-                            new CustomerId(),
+                    Customer.brandNew(
                             new FullName("Jhon", "Doe"),
                             new BirthDate(LocalDate.of(1991, 7, 5)),
                             new Email("invalid"),
                             new Phone("478-256-2504"),
                             new Document("255-08-0578"),
                             false,
-                            OffsetDateTime.now()
+                            Address.builder()
+                                    .street("Boulevard Lebourneuf")
+                                    .number("1255")
+                                    .neighborhood("Centre Ville")
+                                    .city("Québec")
+                                    .state("QC")
+                                    .zipCode(new ZipCode("G1S3M7"))
+                                    .build()
                     );
                 });
     }
 
     @Test
     void given_invalidEmail_whenTryUpdateCustomerEmail_shouldGenerateException() {
-        var customer = new Customer(
-                new CustomerId(),
+        var customer = Customer.brandNew(
                 new FullName("Jhon", "Doe"),
-                new BirthDate(LocalDate.of(1991, Month.AUGUST, 5)),
-                new Email("jhon.doe@gmail.com"),
+                new BirthDate(LocalDate.of(1991, 7, 5)),
+                new Email("valid@email.com"),
                 new Phone("478-256-2504"),
                 new Document("255-08-0578"),
                 false,
-                OffsetDateTime.now()
+                Address.builder()
+                        .street("Boulevard Lebourneuf")
+                        .number("1255")
+                        .neighborhood("Centre Ville")
+                        .city("Québec")
+                        .state("QC")
+                        .zipCode(new ZipCode("G1S3M7"))
+                        .build()
         );
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> {
@@ -49,26 +63,41 @@ class CustomerTest {
 
     @Test
     void given_unarchivedCustomer_whenArchived_shouldAnonymize() {
-        var customer = new Customer(
-                new CustomerId(),
+        var customer = Customer.brandNew(
                 new FullName("Jhon", "Doe"),
-                new BirthDate(LocalDate.of(1991, Month.AUGUST, 5)),
-                new Email("jhon.doe@gmail.com"),
+                new BirthDate(LocalDate.of(1991, 7, 5)),
+                new Email("valid@email.com"),
                 new Phone("478-256-2504"),
                 new Document("255-08-0578"),
                 false,
-                OffsetDateTime.now()
+                Address.builder()
+                        .street("Boulevard Lebourneuf")
+                        .number("1255")
+                        .neighborhood("Centre Ville")
+                        .city("Québec")
+                        .state("QC")
+                        .zipCode(new ZipCode("G1S3M7"))
+                        .build()
         );
 
         customer.archive();
 
         Assertions.assertWith(customer,
-                c -> Assertions.assertThat(c.fullName()).isEqualTo(new FullName("Anonymous", "Anonymous")),
-                c -> Assertions.assertThat(c.email()).isNotEqualTo(new Email("jhon.doe@gmail.com")),
-                c -> Assertions.assertThat(c.phone()).isEqualTo(new Phone("000-000-0000")),
-                c -> Assertions.assertThat(c.document()).isEqualTo(new Document("000-000-0000")),
-                c -> Assertions.assertThat(c.birthDate()).isNull(),
-                c -> Assertions.assertThat(c.isPromotionNotificationAllowed()).isFalse());
+                c -> assertThat(c.fullName()).isEqualTo(new FullName("Anonymous", "Anonymous")),
+                c -> assertThat(c.email()).isNotEqualTo(new Email("jhon.doe@gmail.com")),
+                c -> assertThat(c.phone()).isEqualTo(new Phone("000-000-0000")),
+                c -> assertThat(c.document()).isEqualTo(new Document("000-000-0000")),
+                c -> assertThat(c.birthDate()).isNull(),
+                c -> assertThat(c.isPromotionNotificationAllowed()).isFalse(),
+                c -> assertThat(c.address()).isEqualTo(Address.builder()
+                        .street("Boulevard Lebourneuf")
+                        .number("Anonymized")
+                        .neighborhood("Centre Ville")
+                        .city("Québec")
+                        .state("QC")
+                        .zipCode(new ZipCode("G1S3M7"))
+                                .complement(null)
+                        .build()));
     }
 
     @Test
@@ -84,7 +113,15 @@ class CustomerTest {
                 true,
                 OffsetDateTime.now(),
                 OffsetDateTime.now(),
-                new LoyaltyPoints(10)
+                new LoyaltyPoints(10),
+                Address.builder()
+                        .street("Boulevard Lebourneuf")
+                        .number("1255")
+                        .neighborhood("Centre Ville")
+                        .city("Québec")
+                        .state("QC")
+                        .zipCode(new ZipCode("G1S3M7"))
+                        .build()
         );
 
         Assertions.assertThatExceptionOfType(CustomerArchivedException.class)
@@ -101,34 +138,46 @@ class CustomerTest {
 
     @Test
     void given_brandNewCustomer_whenAddLoayltyPoints_shouldSumPoints() {
-        var customer = new Customer(
-                new CustomerId(),
+        var customer = Customer.brandNew(
                 new FullName("Jhon", "Doe"),
-                new BirthDate(LocalDate.of(1991, Month.AUGUST, 5)),
-                new Email("jhon.doe@gmail.com"),
+                new BirthDate(LocalDate.of(1991, 7, 5)),
+                new Email("valid@email.com"),
                 new Phone("478-256-2504"),
                 new Document("255-08-0578"),
                 false,
-                OffsetDateTime.now()
+                Address.builder()
+                        .street("Boulevard Lebourneuf")
+                        .number("1255")
+                        .neighborhood("Centre Ville")
+                        .city("Québec")
+                        .state("QC")
+                        .zipCode(new ZipCode("G1S3M7"))
+                        .build()
         );
 
         customer.addLoyaltyPoints(new LoyaltyPoints(10));
         customer.addLoyaltyPoints(new LoyaltyPoints(20));
 
-        Assertions.assertThat(customer.loyaltyPoints()).isEqualTo(new LoyaltyPoints(30));
+        assertThat(customer.loyaltyPoints()).isEqualTo(new LoyaltyPoints(30));
     }
 
     @Test
     void given_brandNewCustomer_whenAddInvalidLoayltyPoints_shouldGenerateException() {
-        var customer = new Customer(
-                new CustomerId(),
+        var customer = Customer.brandNew(
                 new FullName("Jhon", "Doe"),
-                new BirthDate(LocalDate.of(1991, Month.AUGUST, 5)),
-                new Email("jhon.doe@gmail.com"),
+                new BirthDate(LocalDate.of(1991, 7, 5)),
+                new Email("valid@email.com"),
                 new Phone("478-256-2504"),
                 new Document("255-08-0578"),
                 false,
-                OffsetDateTime.now()
+                Address.builder()
+                        .street("Boulevard Lebourneuf")
+                        .number("1255")
+                        .neighborhood("Centre Ville")
+                        .city("Québec")
+                        .state("QC")
+                        .zipCode(new ZipCode("G1S3M7"))
+                        .build()
         );
 
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
@@ -140,87 +189,114 @@ class CustomerTest {
 
     @Test
     void given_validValueObjects_whenCreateCustomer_shouldBuildCustomer() {
-        var customerId = new CustomerId();
         var registeredAt = OffsetDateTime.now();
 
-        var customer = new Customer(
-                customerId,
+        var customer = Customer.brandNew(
                 new FullName("Jhon", "Doe"),
                 new BirthDate(LocalDate.of(1991, Month.AUGUST, 5)),
                 new Email("jhon.doe@gmail.com"),
                 new Phone("478-256-2504"),
                 new Document("255-08-0578"),
                 false,
-                registeredAt
+                Address.builder()
+                        .street("Boulevard Lebourneuf")
+                        .number("1255")
+                        .neighborhood("Centre Ville")
+                        .city("Québec")
+                        .state("QC")
+                        .zipCode(new ZipCode("G1S3M7"))
+                        .build()
         );
 
         Assertions.assertWith(customer,
-                c -> Assertions.assertThat(c.id()).isEqualTo(customerId),
-                c -> Assertions.assertThat(c.fullName()).isEqualTo(new FullName("Jhon", "Doe")),
-                c -> Assertions.assertThat(c.birthDate()).isEqualTo(new BirthDate(LocalDate.of(1991, Month.AUGUST, 5))),
-                c -> Assertions.assertThat(c.email()).hasToString("jhon.doe@gmail.com"),
-                c -> Assertions.assertThat(c.phone()).hasToString("478-256-2504"),
-                c -> Assertions.assertThat(c.document()).hasToString("255-08-0578"),
-                c -> Assertions.assertThat(c.isPromotionNotificationAllowed()).isFalse(),
-                c -> Assertions.assertThat(c.isArchived()).isFalse(),
-                c -> Assertions.assertThat(c.registeredAt()).isEqualTo(registeredAt),
-                c -> Assertions.assertThat(c.loyaltyPoints()).isEqualTo(LoyaltyPoints.ZERO));
+                c -> assertThat(c.fullName()).isEqualTo(new FullName("Jhon", "Doe")),
+                c -> assertThat(c.birthDate()).isEqualTo(new BirthDate(LocalDate.of(1991, Month.AUGUST, 5))),
+                c -> assertThat(c.email()).hasToString("jhon.doe@gmail.com"),
+                c -> assertThat(c.phone()).hasToString("478-256-2504"),
+                c -> assertThat(c.document()).hasToString("255-08-0578"),
+                c -> assertThat(c.isPromotionNotificationAllowed()).isFalse(),
+                c -> assertThat(c.isArchived()).isFalse(),
+                c -> assertThat(c.loyaltyPoints()).isEqualTo(LoyaltyPoints.ZERO));
     }
 
     @Test
     void given_futureBirthDate_whenTryCreateCustomer_shouldGenerateException() {
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> new Customer(
-                        new CustomerId(),
+                .isThrownBy(() -> Customer.brandNew(
                         new FullName("Jhon", "Doe"),
-                        new BirthDate(LocalDate.now(ZoneId.of("UTC")).plusDays(1)),
-                        new Email("jhon.doe@gmail.com"),
+                        new BirthDate(LocalDate.of(1991, 7, 5)),
+                        new Email("invalid"),
                         new Phone("478-256-2504"),
                         new Document("255-08-0578"),
                         false,
-                        OffsetDateTime.now()
+                        Address.builder()
+                                .street("Boulevard Lebourneuf")
+                                .number("1255")
+                                .neighborhood("Centre Ville")
+                                .city("Québec")
+                                .state("QC")
+                                .zipCode(new ZipCode("G1S3M7"))
+                                .build()
                 ));
     }
 
     @Test
     void given_blankPhoneOrDocument_whenTryCreateCustomer_shouldGenerateException() {
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> new Customer(
-                        new CustomerId(),
+                .isThrownBy(() -> Customer.brandNew(
                         new FullName("Jhon", "Doe"),
-                        new BirthDate(LocalDate.of(1991, Month.AUGUST, 5)),
-                        new Email("jhon.doe@gmail.com"),
-                        new Phone(" "),
+                        new BirthDate(LocalDate.of(1991, 7, 5)),
+                        new Email("invalid"),
+                        new Phone("478-256-2504"),
                         new Document("255-08-0578"),
                         false,
-                        OffsetDateTime.now()
+                        Address.builder()
+                                .street("Boulevard Lebourneuf")
+                                .number("1255")
+                                .neighborhood("Centre Ville")
+                                .city("Québec")
+                                .state("QC")
+                                .zipCode(new ZipCode("G1S3M7"))
+                                .build()
                 ));
 
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> new Customer(
-                        new CustomerId(),
+                .isThrownBy(() -> Customer.brandNew(
                         new FullName("Jhon", "Doe"),
-                        new BirthDate(LocalDate.of(1991, Month.AUGUST, 5)),
-                        new Email("jhon.doe@gmail.com"),
+                        new BirthDate(LocalDate.of(1991, 7, 5)),
+                        new Email("invalid"),
                         new Phone("478-256-2504"),
-                        new Document(" "),
+                        new Document("255-08-0578"),
                         false,
-                        OffsetDateTime.now()
+                        Address.builder()
+                                .street("Boulevard Lebourneuf")
+                                .number("1255")
+                                .neighborhood("Centre Ville")
+                                .city("Québec")
+                                .state("QC")
+                                .zipCode(new ZipCode("G1S3M7"))
+                                .build()
                 ));
     }
 
     @Test
     void given_nullPhoneValue_whenTryCreateCustomer_shouldGenerateException() {
         Assertions.assertThatExceptionOfType(NullPointerException.class)
-                .isThrownBy(() -> new Customer(
-                        new CustomerId(),
+                .isThrownBy(() -> Customer.brandNew(
                         new FullName("Jhon", "Doe"),
-                        new BirthDate(LocalDate.of(1991, Month.AUGUST, 5)),
-                        new Email("jhon.doe@gmail.com"),
-                        new Phone(null),
+                        new BirthDate(LocalDate.of(1991, 7, 5)),
+                        new Email("valid@email.com"),
+                        null,
                         new Document("255-08-0578"),
                         false,
-                        OffsetDateTime.now()
+                        Address.builder()
+                                .street("Boulevard Lebourneuf")
+                                .number("1255")
+                                .neighborhood("Centre Ville")
+                                .city("Québec")
+                                .state("QC")
+                                .zipCode(new ZipCode("G1S3M7"))
+                                .build()
                 ));
     }
 }
