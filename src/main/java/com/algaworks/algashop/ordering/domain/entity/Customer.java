@@ -41,7 +41,27 @@ public class Customer implements Serializable {
         );
     }
 
-    public Customer(CustomerId id, FullName fullName, BirthDate birthDate, Email email, Phone phone, Document document,
+    public static Customer existing(CustomerId id, FullName fullName, BirthDate birthDate, Email email, Phone phone,
+                                    Document document, Boolean promotionNotificationAllowed, Boolean archived,
+                                    OffsetDateTime registeredAt, OffsetDateTime archivedAt, LoyaltyPoints loyaltyPoints,
+                                    Address address) {
+        return new Customer(
+                id,
+                fullName,
+                birthDate,
+                email,
+                phone,
+                document,
+                promotionNotificationAllowed,
+                archived,
+                registeredAt,
+                archivedAt,
+                loyaltyPoints,
+                address
+        );
+    }
+
+    private Customer(CustomerId id, FullName fullName, BirthDate birthDate, Email email, Phone phone, Document document,
                     Boolean promotionNotificationAllowed, Boolean archived, OffsetDateTime registeredAt,
                     OffsetDateTime archivedAt, LoyaltyPoints loyaltyPoints, Address address) {
         this.setId(id);

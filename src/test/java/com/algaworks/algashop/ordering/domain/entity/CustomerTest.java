@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -102,7 +101,7 @@ class CustomerTest {
 
     @Test
     void given_archivedCustomer_whenTryToUpdate_shouldGenerateException() {
-        var customer = new Customer(
+        var customer = Customer.existing(
                 new CustomerId(),
                 new FullName("Anonymous", "Anonymous"),
                 null,
