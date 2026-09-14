@@ -1,5 +1,6 @@
 package com.algaworks.algashop.ordering.domain.entity;
 
+import com.algaworks.algashop.ordering.domain.exception.OrderInvalidShippingDeliveryDateException;
 import com.algaworks.algashop.ordering.domain.exception.OrderStatusCannotBeChangedException;
 import com.algaworks.algashop.ordering.domain.valueobject.*;
 import com.algaworks.algashop.ordering.domain.valueobject.id.CustomerId;
@@ -10,6 +11,7 @@ import lombok.Builder;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
@@ -98,6 +100,31 @@ public class Order {
     public void place() {
         // TODO Business rules
         this.changeStatus(OrderStatus.PLACED);
+    }
+
+    public void changePaymentMethod(PaymentMethod paymentMethod) {
+        Objects.requireNonNull(paymentMethod);
+        this.setPaymentMethod(paymentMethod);
+    }
+
+    public void changeBillingInfo(BillingInfo billingInfo) {
+        Objects.requireNonNull(billingInfo);
+        setBilling(billingInfo);
+    }
+
+    public void changeShippingInfo(ShippingInfo shippingInfo, Money shippingCost, LocalDate expectedDeliveryDate) {
+        Objects.requireNonNull(shippingInfo);
+        Objects.requireNonNull(shippingCost);
+        Objects.requireNonNull(expectedDeliveryDate);
+
+        if (expectedDeliveryDate.isBefore(LocalDate.now(ZoneId.systemDefault()))) {
+            throw new OrderInvalidShippingDeliveryDateException(this.id());
+        }
+
+        this.setShipping(shippingInfo);
+        this.setShippingCost(shippingCost);
+        this.setExpectedDeliveryDate(expectedDeliveryDate);
+
     }
 
     public boolean isDraft() {
