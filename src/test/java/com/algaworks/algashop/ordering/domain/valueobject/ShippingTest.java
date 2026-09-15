@@ -2,10 +2,13 @@ package com.algaworks.algashop.ordering.domain.valueobject;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
-class ShippingInfoTest {
+class ShippingTest {
 
     private static Address anAddress() {
         return Address.builder()
@@ -21,23 +24,18 @@ class ShippingInfoTest {
 
     @Test
     void shouldGenerateWithValidData() {
-        ShippingInfo billingInfo = ShippingInfo.builder()
-                .fullName(new FullName("John", "Doe"))
-                .document(new Document("255-08-0578"))
-                .phone(new Phone("1191125-5555"))
+        Shipping shipping = Shipping.builder()
+                .cost(new Money("10.00"))
+                .expectedDeliveryDate(LocalDate.now(ZoneId.systemDefault()).plusWeeks(2))
+                .recipient(Recipient.builder()
+                        .fullName(new FullName("John", "Doe"))
+                        .document(new Document("255-08-0578"))
+                        .phone(new Phone("1191125-5555"))
+                        .build())
                 .address(anAddress())
                 .build();
 
-        assertThat(billingInfo.fullName()).hasToString("John Doe");
-        assertThat(billingInfo.address()).isEqualTo(anAddress());
-    }
-
-    @Test
-    void shouldNotAllowNullFields() {
-        assertThatNullPointerException().isThrownBy(() -> ShippingInfo.builder()
-                .fullName(new FullName("John", "Doe"))
-                .document(new Document("255-08-0578"))
-                .phone(new Phone("1191125-5555"))
-                .build());
+        assertThat(shipping.recipient().fullName()).hasToString("John Doe");
+        assertThat(shipping.address()).isEqualTo(anAddress());
     }
 }
