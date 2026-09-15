@@ -109,7 +109,7 @@ public class Order {
         this.setPaymentMethod(paymentMethod);
     }
 
-    public void changeBillingInfo(Billing billingInfo) {
+    public void changeBilling(Billing billingInfo) {
         Objects.requireNonNull(billingInfo);
         setBilling(billingInfo);
     }
