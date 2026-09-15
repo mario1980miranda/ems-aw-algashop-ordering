@@ -208,4 +208,23 @@ class OrderTest {
         assertThat(order.paidAt()).isNotNull();
 
     }
+
+    @Test
+    void givenDraftOrder_whenChangeItem_shouldRecalculate() {
+        Order order = Order.draft(new CustomerId());
+        order.addItem(
+                new ProductId(),
+                new ProductName("Desktop X11"),
+                new Money("10.00"),
+                new Quantity(3)
+        );
+        OrderItem orderItem = order.items().iterator().next();
+
+        order.changeItemQuantity(orderItem.id(), new Quantity(5));
+
+        assertWith(order,
+                o -> assertThat(o.totalAmount()).isEqualTo(new Money("50.00")),
+                o-> assertThat(o.totalItems()).isEqualTo(new Quantity(5))
+        );
+    }
 }

@@ -8,7 +8,6 @@ import com.algaworks.algashop.ordering.domain.valueobject.id.OrderItemId;
 import com.algaworks.algashop.ordering.domain.valueobject.id.ProductId;
 import lombok.Builder;
 
-import java.math.BigDecimal;
 import java.util.Objects;
 
 public class OrderItem {
@@ -52,6 +51,12 @@ public class OrderItem {
         orderItem.recalculateTotals();
 
         return orderItem;
+    }
+
+    void changeQuantity(Quantity quantity) {
+        Objects.requireNonNull(quantity);
+        this.setQuantity(quantity);
+        this.recalculateTotals();
     }
 
     public OrderItemId id() {
