@@ -90,6 +90,8 @@ public class Order {
         Objects.requireNonNull(product);
         Objects.requireNonNull(quantity);
 
+        product.checkOutOfStock();
+
         final var orderItem = OrderItem.brandNew()
                 .orderId(this.id())
                 .product(product)
