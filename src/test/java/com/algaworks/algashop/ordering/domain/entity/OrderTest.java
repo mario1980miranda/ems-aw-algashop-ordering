@@ -26,22 +26,17 @@ class OrderTest {
     void shouldAddItem() {
 
         final var order = Order.draft(new CustomerId());
-        final var productId = new ProductId();
+        final var product = ProductTestDataBuilder.aProduct_MousePad().build();
+        final var productId = product.id();
 
-        order.addItem(
-                productId,
-                new ProductName("Mouse pad"),
-                new Money("100"),
-                new Quantity(1)
-        );
+        order.addItem(product, new Quantity(1));
 
         assertThat(order.items()).isNotEmpty();
         assertThat(order.items()).hasSize(1);
         final var orderItem = order.items().iterator().next();
         assertWith(orderItem,
                 i -> assertThat(i.id()).isNotNull(),
-                i -> assertThat(i.productName()).isEqualTo(new ProductName("Mouse pad")),
-                i -> assertThat(i.productName()).isEqualTo(new ProductName("Mouse pad")),
+                i -> assertThat(i.productName()).isEqualTo(new ProductName("Mouse Pad")),
                 i -> assertThat(i.productId()).isEqualTo(productId),
                 i -> assertThat(i.price()).isEqualTo(new Money("100")),
                 i -> assertThat(i.quantity()).isEqualTo(new Quantity(1))
@@ -52,11 +47,8 @@ class OrderTest {
     void shouldGenerateExceptionWhenTryToChangeItemSet() {
 
         final var order = Order.draft(new CustomerId());
-        final var productId = new ProductId();
         order.addItem(
-                productId,
-                new ProductName("Mouse pad"),
-                new Money("100"),
+                ProductTestDataBuilder.aProduct_MousePad().build(),
                 new Quantity(1)
         );
 
@@ -68,21 +60,16 @@ class OrderTest {
     void shouldCalculateTotals() {
 
         final var order = Order.draft(new CustomerId());
-        final var productId = new ProductId();
         order.addItem(
-                productId,
-                new ProductName("Mouse pad"),
-                new Money("100"),
+                ProductTestDataBuilder.aProduct_MousePad().build(),
                 new Quantity(2)
         );
         order.addItem(
-                productId,
-                new ProductName("RAM memory"),
-                new Money("50"),
+                ProductTestDataBuilder.aProduct_RamMemory().build(),
                 new Quantity(1)
         );
 
-        assertThat(order.totalAmount()).isEqualTo(new Money("250"));
+        assertThat(order.totalAmount()).isEqualTo(new Money("400"));
         assertThat(order.totalItems()).isEqualTo(new Quantity(3));
     }
 
@@ -213,9 +200,7 @@ class OrderTest {
     void givenDraftOrder_whenChangeItem_shouldRecalculate() {
         Order order = Order.draft(new CustomerId());
         order.addItem(
-                new ProductId(),
-                new ProductName("Desktop X11"),
-                new Money("10.00"),
+                ProductTestDataBuilder.aProduct().build(),
                 new Quantity(3)
         );
         OrderItem orderItem = order.items().iterator().next();
@@ -223,7 +208,7 @@ class OrderTest {
         order.changeItemQuantity(orderItem.id(), new Quantity(5));
 
         assertWith(order,
-                o -> assertThat(o.totalAmount()).isEqualTo(new Money("50.00")),
+                o -> assertThat(o.totalAmount()).isEqualTo(new Money("15000")),
                 o-> assertThat(o.totalItems()).isEqualTo(new Quantity(5))
         );
     }
