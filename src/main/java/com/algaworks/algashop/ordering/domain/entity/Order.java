@@ -2,7 +2,7 @@ package com.algaworks.algashop.ordering.domain.entity;
 
 import com.algaworks.algashop.ordering.domain.exception.OrderCannotBeEditedException;
 import com.algaworks.algashop.ordering.domain.exception.OrderCannotBePlacedException;
-import com.algaworks.algashop.ordering.domain.exception.OrderDoesNotContainsOrderItemException;
+import com.algaworks.algashop.ordering.domain.exception.OrderDoesNotContainOrderItemException;
 import com.algaworks.algashop.ordering.domain.exception.OrderInvalidShippingDeliveryDateException;
 import com.algaworks.algashop.ordering.domain.exception.OrderStatusCannotBeChangedException;
 import com.algaworks.algashop.ordering.domain.valueobject.*;
@@ -92,6 +92,16 @@ public class Order {
                 .quantity(quantity)
                 .build();
         this.items.add(orderItem);
+
+        this.recalculateTotals();
+    }
+
+    public void removeItem(OrderItemId orderItemId) {
+        Objects.requireNonNull(orderItemId);
+        this.verifyIfChangeable();
+
+        OrderItem orderItem = this.findOrderItem(orderItemId);
+        this.items.remove(orderItem);
 
         this.recalculateTotals();
     }
@@ -261,7 +271,7 @@ public class Order {
         return this.items().stream()
                 .filter(i -> i.id().equals(orderItemId))
                 .findFirst()
-                .orElseThrow(() -> new OrderDoesNotContainsOrderItemException(this.id(), orderItemId));
+                .orElseThrow(() -> new OrderDoesNotContainOrderItemException(this.id(), orderItemId));
     }
 
     private void setId(OrderId id) {
