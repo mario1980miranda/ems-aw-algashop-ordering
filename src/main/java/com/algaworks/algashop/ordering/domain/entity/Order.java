@@ -108,13 +108,13 @@ public class Order {
 
     public void place() {
         this.verifyIfCanChangeToPlaced();
-        this.setPlacedAt(OffsetDateTime.now(ZoneId.systemDefault()));
         this.changeStatus(OrderStatus.PLACED);
+        this.setPlacedAt(OffsetDateTime.now(ZoneId.systemDefault()));
     }
 
     public void markAsPaid() {
-        this.setPaidAt(OffsetDateTime.now(ZoneId.systemDefault()));
         this.changeStatus(OrderStatus.PAID);
+        this.setPaidAt(OffsetDateTime.now(ZoneId.systemDefault()));
     }
 
     public void markAsReady() {
