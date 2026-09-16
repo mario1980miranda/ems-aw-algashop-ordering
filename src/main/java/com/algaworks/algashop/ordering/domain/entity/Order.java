@@ -117,6 +117,11 @@ public class Order {
         this.changeStatus(OrderStatus.PAID);
     }
 
+    public void markAsReady() {
+        this.changeStatus(OrderStatus.READY);
+        this.setReadyAt(OffsetDateTime.now(ZoneId.systemDefault()));
+    }
+
     public void changePaymentMethod(PaymentMethod paymentMethod) {
         this.verifyIfChangeable();
 
@@ -165,6 +170,10 @@ public class Order {
 
     public boolean isPaid() {
         return OrderStatus.PAID.equals(this.status());
+    }
+
+    public boolean isReady() {
+        return OrderStatus.READY.equals(this.status());
     }
 
     public OrderId id() {
