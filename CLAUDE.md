@@ -1,13 +1,15 @@
 # Ordering service
 
+Voir `README.md` pour le modèle métier (cycle de vie de `Order`, règles de `ShoppingCart`).
+
 Microservice Spring Boot 3.4 / Java 21 / Gradle, en DDD tactique. Pour l'instant : couche domaine uniquement.
 
 ## Commandes
 - Tests : `./gradlew test`
 - Build : `./gradlew build`
 
-## Organisation du package `com.algaworks.algashop.ordering.domain`
-- `entity/` : aggregates et entités (`Order`, `OrderItem`, `Customer`), enums de statut
+## Organisation du package `com.algaworks.algashop.ordering.domain.model`
+- `entity/` : aggregates et entités (`Order`, `OrderItem`, `ShoppingCart`, `ShoppingCartItem`, `Customer`), enums de statut
 - `valueobject/` : value objects immuables ; `valueobject/id/` pour les identifiants typés
 - `exception/` : exceptions métier héritant de `DomainException`, messages dans `ErrorMessages`
 - `factory/` : construction d'aggregates complexes
@@ -15,7 +17,7 @@ Microservice Spring Boot 3.4 / Java 21 / Gradle, en DDD tactique. Pour l'instant
 
 ## Conventions
 - Value objects : validation dans le constructeur (`Objects.requireNonNull`, `FieldValidations`), aucun setter, opérations qui retournent une nouvelle instance
-- Entités : setters privés, invariants vérifiés dans les setters ; reconstruction depuis la persistance via `@Builder(builderClassName = "ExistingXBuilder", builderMethodName = "existing")`, création via une factory statique (`Order.draft(...)`)
+- Entités : setters privés, invariants vérifiés dans les setters ; reconstruction depuis la persistance via `@Builder(builderClassName = "ExistingXBuilder", builderMethodName = "existing")`, création via une factory statique (`Order.draft(...)`, `ShoppingCart.startShopping(...)`)
 - Pas d'annotations Spring/JPA dans `domain`
 - Lombok : `@Builder` uniquement ; pas de `@Data` ni `@Setter` sur les entités
 
